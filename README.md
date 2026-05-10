@@ -1,50 +1,231 @@
-# 🚀 Desafio Técnico: API de Foco e Produtividade
+# API de Foco e Produtividade
 
-O objetivo deste teste é criar o backend de um **"Log de Performance"**. Em vez de apenas registrar tarefas, queremos entender o **estado de fluxo** do desenvolvedor ou estudante durante suas atividades.
+API backend desenvolvida como um "Log de Performance" para registrar sessões de trabalho e gerar diagnósticos inteligentes sobre foco, produtividade e padrões de concentração.
 
-## 📅 Regras de Entrega
+A proposta do projeto é ir além de um simples registro de tarefas, oferecendo uma análise contextual do estado de foco e produtividade do usuário ao longo das sessões de trabalho ou estudo.
 
-* Prazo: O projeto deve ser entregue até a próxima segunda-feira.
-* Uso de IA: O uso de ferramentas de Inteligência Artificial (ChatGPT, GitHub Copilot, etc.) é permitido.
-* Transparência: Caso utilize IA, você deve commitar os artefatos gerados junto ao repositório. Queremos entender como você utiliza essas ferramentas para acelerar seu fluxo de trabalho.
-* Faça o **fork desse projeto** e me avise quando terminar o [wouerner](https://www.linkedin.com/in/wouerner/) no linkedin. (necessario para pode acompanhar pelo github quem participou)
+## Fluxo geral da aplicação:
 
-## 📝 O Contexto
-Muitas vezes trabalhamos muito, mas produzimos pouco. Você deve construir uma API simples que ajude o usuário a registrar seu nível de produtividade e, ao final, entregue um **diagnóstico inteligente** de como foi o seu período de trabalho.
+![img](./api-img.png)
 
-## 🛠 Requisitos Técnicos
-*   **Linguagem:** Python 3.x.
-*   **Framework:** À sua escolha (FastAPI, Flask, Django, etc).
-*   **Armazenamento:** Pode ser em memória (dicionários/listas) ou SQLite para simplicidade.
-*   **Diferencial:** Código limpo, bem comentado e presença de um `README.md` explicando como rodar o projeto.
+## Objetivo
 
----
+Permitir o registro de sessões de foco e transformar esses dados em insights simples e úteis sobre produtividade, padrões de concentração e interrupções. Destacando:
+- média de foco
+- tempo total focado
+- feedback automático baseado no comportamento registrado
+- padrões identificados nas sessões
 
-## 🛣 Os Endpoints
+## Tecnologias
 
-### 1. `POST /registro-foco`
-O usuário deve enviar os dados de um bloco de trabalho recém-encerrado.
+- Python 3.14
+- FastAPI
+- SQLAlchemy
+- SQLite
+- Pydantic
+- Uvicorn
 
-**Campos obrigatórios:**
-*   `nivel_foco`: Um valor inteiro de **1 a 5** (onde 1 é "muito distraído" e 5 é "estado de flow").
-*   `tempo_minutos`: Um inteiro representando quanto tempo durou a sessão.
-*   `comentario`: Uma string descrevendo o que foi feito ou o que causou distração.
+## Funcionalidades
 
-> **💡 Dica de Criatividade:** Sinta-se à vontade para adicionar campos extras, como `categoria` (coding, reunião, estudo), `data` ou `tags`.
+- Registro de sessões de foco com validação automática
+- Persistência local com SQLite
+- Listagem de registros salvos
+- Diagnóstico inteligente com base nos dados cadastrados
+- Análise simples de padrões por categoria, interrupções e duração da sessão
+- Documentação interativa automática com Swagger/OpenAPI
 
-### 2. `GET /diagnostico-produtividade`
-Este endpoint deve retornar um resumo inteligente baseado em todos os registros salvos.
+## Estrutura do projeto
 
-**O que deve retornar (JSON):**
-*   **Média do nível de foco:** A média aritmética de todos os registros.
-*   **Tempo total focado:** A soma de todos os minutos registrados.
-*   **Lógica Criativa (Diferencial):** Uma "mensagem de feedback" automática baseada nos dados analisados.
-    *   *Exemplo:* Se a média de foco for `< 3`, sugerir "Pausas mais longas e menos notificações". Se for `> 4`, "Você está em uma maratona produtiva de alto nível!".
+```txt
+.
+├── README.md
+├── app
+│   ├── api
+│   │   └── routes.py
+│   ├── core
+│   │   └── database.py
+│   ├── main.py
+│   ├── models
+│   │   └── focus_log.py
+│   ├── schemas
+│   │   └── focus_log.py
+│   └── services
+│       └── diagnostic_service.py
+└── focus.db
+```
 
----
+## Como rodar o projeto
 
-## 📊 O que será avaliado
-1.  **Organização do Código:** Estrutura de pastas e legibilidade.
-2.  **Manipulação de Dados:** Como você lida com tipos, cálculos e persistência.
-3.  **Tratamento de Erros:** Respostas adequadas para entradas inválidas (ex: nível de foco fora do range 1-5).
-4.  **Criatividade:** Pequenos detalhes que tornam a API mais útil para o usuário final.
+Pré-requisitos:
+- Python 3.14+
+- Make
+
+1. Criar e ativar o ambiente virtual
+```bash
+python3.14 -m venv .venv
+source .venv/bin/activate
+```
+
+2. Instalar dependências
+```bash
+make install
+```
+
+3. Rodar a aplicação
+```bash
+make run
+```
+
+4. Abrir a documentação interativa
+Acesse: http://localhost:8000/docs
+
+## Endpoints
+### `GET /`
+
+Endpoint de verificação da API.
+
+Resposta:
+```json
+{
+  "status": "ok"
+}
+```
+
+### `POST /registro-foco`
+Registra uma sessão de foco.
+
+Campos enviados:
+- nivel_foco: inteiro entre 1 e 5
+- tempo_minutos: inteiro maior que 0
+- comentario: texto descritivo
+- categoria: texto representando o tipo da atividade
+- interrupcoes: inteiro maior ou igual a 0
+
+Exemplo de payload:
+```json
+{
+  "nivel_foco": 5,
+  "tempo_minutos": 120,
+  "comentario": "Implementando persistência SQLite",
+  "categoria": "coding",
+  "interrupcoes": 1
+}
+```
+
+### `GET /registros-foco`
+Retorna todos os registros salvos no banco.
+
+### `GET /diagnostico-produtividade`
+Retorna o resumo analítico da produtividade com:
+
+- média do nível de foco
+- tempo total focado
+- feedback automático
+- padrões detectados
+
+Exemplo de resposta:
+```json
+{
+  "media_foco": 4.2,
+  "tempo_total_focado": 480,
+  "feedback": "Você está em um excelente ritmo de produtividade e concentração.",
+  "padroes_detectados": [
+    "Você mantém um padrão consistente de alta concentração.",
+    "A categoria 'coding' apresenta seu melhor desempenho."
+  ]
+}
+```
+
+
+## Decisões de projeto
+
+### FastAPI
+Escolhido pela simplicidade, validação automática, tipagem clara e documentação Swagger gerada automaticamente.
+
+### SQLite
+Escolhido por ser suficiente para o escopo do teste, além de exigir pouca configuração e facilitar a execução local.
+
+### Separação por camadas
+O projeto foi organizado em:
+
+- api: rotas
+- schemas: validação e serialização
+- models: mapeamento ORM
+- services: regras de negócio e diagnóstico
+- core: configuração de banco
+
+Essa separação melhora a legibilidade e facilita a evolução do projeto.
+
+### Inteligência do diagnóstico
+
+O diagnóstico não se limita à média e à soma de minutos. A API também analisa heurísticas simples, como:
+
+- sessões com muitas interrupções
+- sessões muito longas
+- categoria com melhor desempenho médio
+- padrão geral de foco
+
+Isso permite transformar registros simples em insights úteis sobre padrões de produtividade e concentração.
+
+### Uso de IA
+
+Ferramentas de IA foram utilizadas como apoio para:
+
+- brainstorming da arquitetura e ideia
+- refinamento da estrutura inicial do projeto e início rápido
+- geração de imagem utilizada neste readme
+
+As decisões finais de arquitetura, implementação e organização foram revisadas e refinadas manualmente para manter clareza, simplicidade e coerência técnica.
+
+#### Prompts utilizados durante o desenvolvimento:
+
+```md
+# Arquitetura inicial e Decisões Arquiteturais
+- FastAPI foi escolhido pela simplicidade e tipagem forte.
+- SQLite foi utilizado por exigir pouca configuração.
+- A separação em api, services, models e schemas foi adotada para melhorar organização e manutenção.
+- O projeto priorizou simplicidade e clareza ao invés de abstrações excessivas.
+
+- Discussão sobre estruturação com FastAPI utilizando:
+  - rotas
+  - schemas
+  - services
+  - models
+  - SQLite (SQLAlchemy)
+
+Objetivo:
+manter simplicidade, clareza e separação de responsabilidades.
+
+# Heurísticas do diagnóstico
+Exploração de ideias para transformar registros simples em feedbacks úteis de produtividade.
+
+Exemplos discutidos:
+- impacto de interrupções
+- sessões excessivamente longas
+- categorias com melhor desempenho médio
+- padrões gerais de concentração
+
+# Refinamento de experiência de uso
+Sugestões relacionadas a:
+- organização do README
+- Makefile
+- experiência de execução local
+- clareza da documentação
+```
+
+## Melhorias futuras
+- adicionar timestamps por registro
+- incluir testes automatizados
+- criar filtros por categoria e período
+- melhorar o score de produtividade
+- adicionar exportação de relatórios
+- adicionar autenticação caso o projeto evolua para múltiplos usuários
+
+## Filosofia do projeto
+
+O projeto foi desenvolvido com foco em simplicidade, clareza e utilidade prática.
+
+A proposta não foi construir uma arquitetura excessivamente complexa, mas sim entregar uma API funcional, organizada e fácil de compreender, priorizando legibilidade, experiência de uso e capacidade de evolução.
+
+## Autor
+Projeto desenvolvido como teste técnico de backend em Python.
